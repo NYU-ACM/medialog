@@ -6,6 +6,11 @@ class MlogEntriesController < ApplicationController
   
   before_action :set_mlog_entry, only: [:show, :edit, :update, :destroy]
   
+  def aspace
+    aspace = AspaceClient.new
+    puts aspace.get_accession_by_title(3, "Jeremy")
+  end
+  
   def nav 
     mlog = MlogEntry.find(params[:id]) 
     id = mlog.media_id

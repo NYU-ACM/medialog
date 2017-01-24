@@ -1,5 +1,5 @@
 module ApplicationHelper
-
+  
   def lookup_mlog_entry(col_id, m_id)
     MlogEntry.where("collection_id = ? and media_id =?", col_id, m_id) 
   end

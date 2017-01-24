@@ -15,6 +15,7 @@ gem 'openurl', '~> 1.0.0'
 gem 'devise'
 gem 'thin'
 gem 'therubyracer'
+gem 'archivesspace-client'
 
 group :development do
   gem 'pry'
