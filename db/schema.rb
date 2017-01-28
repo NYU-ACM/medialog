@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161107171928) do
+ActiveRecord::Schema.define(version: 20170126152831) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,8 @@ ActiveRecord::Schema.define(version: 20161107171928) do
     t.text     "accession_note"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "aspace_col_id"
+    t.integer  "aspace_acc_id"
   end
 
   create_table "collections", force: true do |t|
@@ -31,6 +33,7 @@ ActiveRecord::Schema.define(version: 20161107171928) do
     t.string   "partner_code"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "aspace_col_id"
   end
 
   create_table "mlog_entries", id: :uuid, default: "uuid_generate_v4()", force: true do |t|
