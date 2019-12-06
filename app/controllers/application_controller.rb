@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
 
-  require ApplicationHelper
+  include ApplicationHelper
 
 end
