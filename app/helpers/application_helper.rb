@@ -116,119 +116,72 @@ module ApplicationHelper
 
     summaries
   end
-  
-end
 
+  class Min_Col
 
-class Min_Col
+    attr_accessor :c_code, :p_code, :c_title
 
-  attr_accessor :c_code, :p_code, :c_title
-
-  def initialize(c_code, p_code, c_title)
-    @c_code = c_code
-    @p_code = p_code
-    @c_title = c_title
-  end
-end
-
-def getMinCollections
-  min_cols = Hash.new
-  cols = Collection.select("id, collection_code, partner_code, title")
-  cols.each do |col|
-    min_cols[col.id] = Min_Col.new(col.collection_code, col.partner_code, col.title)
-  end
-  min_cols
-end
-
-def getMinAccessions
-  min_accs = Hash.new
-  accs = Accession.select("id, accession_num")
-  accs.each do |acc|
-    min_accs[acc.id] = acc.accession_num
-  end
-  min_accs
-end
-
-def get_summaries(mlog_entries)
-  summaries = Hash.new
-  sum = 0.0
-  image_sum = 0.0
-
-  mlog_entries.each do |entry|
-    if(entry.stock_unit == 'KB') then
-      sum = sum + kb_to_byte(entry.stock_size_num)
-    elsif(entry.stock_unit == 'MB') then
-      sum = sum + mb_to_byte(entry.stock_size_num)
-    elsif (entry.stock_unit == 'GB') then
-      sum = sum + gb_to_byte(entry.stock_size_num)
-    end
-
-    if(entry.image_size_bytes != nil) then
-      image_sum = image_sum + entry.image_size_bytes
+    def initialize(c_code, p_code, c_title)
+      @c_code = c_code
+      @p_code = p_code
+      @c_title = c_title
     end
   end
 
-  summaries["stock_size"] = human_size(sum)
-  summaries["image_size"] = human_size(image_sum)
+  def get_sizes(collections)
 
-  summaries
-end
+    collection_sizes = Hash.new
 
+    collections.each do |collection|
+      entries = MlogEntry.where(["collection_id = ?", collection.id])
+      entries.each do |entry|
+        stock_size = 0.0
+        image_size = 0.0
 
-def get_sizes(collections)
+        if entry.image_size_bytes != nil then
+          image_size = entry.image_size_bytes
+        end
 
-  collection_sizes = Hash.new
+        if entry.stock_size != nil then
+          if(entry.stock_unit == 'KB') then
+            stock_size = kb_to_byte(entry.stock_size_num)
+          elsif(entry.stock_unit == 'MB') then
+            stock_size = mb_to_byte(entry.stock_size_num)
+          elsif (entry.stock_unit == 'GB') then
+            stock_size = gb_to_byte(entry.stock_size_num)
+          elsif(entry.stock_unit == 'TB') then
+            stock_size = tb_to_byte(entry.stock_size_num)
+          end
+        end
 
-  collections.each do |collection|
-    entries = MlogEntry.where(["collection_id = ?", collection.id])
-    entries.each do |entry|
-      stock_size = 0.0
-      image_size = 0.0
-
-      if entry.image_size_bytes != nil then
-        image_size = entry.image_size_bytes
-      end
-
-      if entry.stock_size != nil then
-        if(entry.stock_unit == 'KB') then
-          stock_size = kb_to_byte(entry.stock_size_num)
-        elsif(entry.stock_unit == 'MB') then
-          stock_size = mb_to_byte(entry.stock_size_num)
-        elsif (entry.stock_unit == 'GB') then
-          stock_size = gb_to_byte(entry.stock_size_num)
-        elsif(entry.stock_unit == 'TB') then
-          stock_size = tb_to_byte(entry.stock_size_num)
+        if !collection_sizes.include? entry.collection_id then
+          collection_sizes[collection.id] = Repository_Coll.new(stock_size, image_size)
+        else
+          new_collection = collection_sizes[collection.id]
+          new_image_size  = new_collection.image_size + image_size
+          new_stock_size = new_collection.stock_size + stock_size
+          collection_sizes[collection.id] = Repository_Coll.new(new_stock_size, new_image_size)
         end
       end
-
-      if !collection_sizes.include? entry.collection_id then
-        collection_sizes[collection.id] = Repository_Coll.new(stock_size, image_size)
-      else
-        new_collection = collection_sizes[collection.id]
-        new_image_size  = new_collection.image_size + image_size
-        new_stock_size = new_collection.stock_size + stock_size
-        collection_sizes[collection.id] = Repository_Coll.new(new_stock_size, new_image_size)
-      end
-
     end
-  end
-  return collection_sizes
-end
-
-def get_collection_summaries(sizes)
-  summaries = Hash.new
-  stock = 0.0
-  image = 0.0
-
-  sizes.each do |size|
-    stock = stock + size[1].stock_size
-    image = image + size[1].image_size
+    return collection_sizes
   end
 
-  summaries["stock_size"] = stock
-  summaries["image_size"] = image
+  def get_collection_summaries(sizes)
+    summaries = Hash.new
+    stock = 0.0
+    image = 0.0
 
-  summaries
+    sizes.each do |size|
+      stock = stock + size[1].stock_size
+      image = image + size[1].image_size
+    end
+
+    summaries["stock_size"] = stock
+    summaries["image_size"] = image
+
+    summaries
+  end
 
 
   class Repository_Coll
