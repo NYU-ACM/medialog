@@ -5,7 +5,8 @@ class MlogEntriesController < ApplicationController
   include MlogEntriesHelper
   
   before_action :set_mlog_entry, only: [:show, :edit, :update, :destroy]
-  
+  before_action :authenticate_user!
+
   def nav 
     mlog = MlogEntry.find(params[:id]) 
     id = mlog.media_id

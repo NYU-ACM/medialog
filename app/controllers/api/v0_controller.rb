@@ -1,5 +1,7 @@
 class Api::V0Controller < ApplicationController
 
+  include ApplicationHelper
+
   def accession 
     mlog_entries = MlogEntry.where("accession_id = ?", params["id"])
     accession =  Accession.find(params["id"])
